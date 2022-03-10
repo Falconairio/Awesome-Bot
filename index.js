@@ -7,6 +7,7 @@ const fortune = require("./commands/fortune")
 const echo = require("./commands/echo")
 const cool = require("./commands/cool")
 const daily = require("./commands/daily")
+const quote = require("./commands/quote")
 const config = require("./config.json");
 
 const channels = config.CHANNELS.split(" ");
@@ -14,7 +15,7 @@ const channels = config.CHANNELS.split(" ");
 client.on('ready', () => {
   console.log('Ready!');
   client.user.setStatus('available')
-  client.user.setActivity("Rick Astely bot is great"
+  client.user.setActivity("stinky"
   , {
     type: "STREAMING",
     url: "https://www.youtube.com/watch?v=SjHUb7NSrNk"
@@ -50,6 +51,9 @@ client.on('interactionCreate', async interaction => {
 
   else if(interaction.commandName === "daily") {
     await daily.execute(interaction)
+  } 
+  else if(interaction.commandName === "quote") {
+    await quote.execute(interaction,client)
   }
 
 });
