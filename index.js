@@ -8,9 +8,10 @@ const echo = require("./commands/echo")
 const cool = require("./commands/cool")
 const daily = require("./commands/daily")
 const quote = require("./commands/quote")
-const config = require("./config.json");
+const pinned = require("./commands/pinned")
 
-const channels = config.CHANNELS.split(" ");
+const config = require("./config.json");
+const servers = config.SERVERS.split(" ");
 
 client.on('ready', () => {
   console.log('Ready!');
@@ -26,11 +27,11 @@ client.on('ready', () => {
 
 client.on('interactionCreate', async interaction => {
   if (interaction.user.bot) return;
-  if(!channels.includes(interaction.channelId)) return;
+  if(!servers.includes(interaction.guildId)) return;
 	if (!interaction.isCommand()) return;
 
 	if (interaction.commandName === 'ping') {
-		await ping.execute(interaction)
+		await ping.execute(interaction,client)
 	}
 
   else if(interaction.commandName === "rat") {
@@ -55,7 +56,10 @@ client.on('interactionCreate', async interaction => {
   else if(interaction.commandName === "quote") {
     await quote.execute(interaction,client)
   }
-
+  else if(interaction.commandName === "pinned") {
+    await pinned.execute(interaction,client)
+  }
 });
+
 
 client.login(config.BOT_TOKEN);
