@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { Interaction } = require('discord.js');
 const config = require("./../config.json");
 const servers = config.PINNED_CHANNELS.split(" ");
 
@@ -7,21 +8,50 @@ module.exports = {
 		.setName('pinned')
 		.setDescription('Grabs a random hilarious pinned message'),
 	async execute(interaction,client) {
-        if(interaction.guildId === config.SERVER_TWO) {
-            const channelId = servers[Math.floor(Math.random() * servers.length)]
-            let channel = client.channels.cache.get(channelId);
-            channel.messages.fetchPinned()
-            .then((messages) => {
-                const pins = [...messages]
-                let randomPin = pins[Math.floor(Math.random() * pins.length)]
-                const exampleEmbed = {
-                    title: `Random hilarious message`,
-                    description: "rereerere"
-                };
-                interaction.reply({embeds: [exampleEmbed]})
+            interaction.reply("working on it...")
+            await interaction.guild.channels.fetch().then((data) => {
+                let textChannels = data.filter((el) => el.type === "GUILD_TEXT")
+                let channels = textChannels.map((el) => el);
+                let pinnedMessagesArray = []
+                getAllPinnedMessages(channels,pinnedMessagesArray)
+                .then(() => {
+                    setTimeout(() => {
+                        let randomPin = pinnedMessagesArray[Math.floor(Math.random() * pinnedMessagesArray.length)]
+                        const exampleEmbed = {
+                            title: `${randomPin.content.substring(0,256)}`,
+                            description: `-*${randomPin.author.username}*`,
+                            image: {
+                                url: `${
+                                    (randomPin.attachments.size > 0)
+                                    ? getAttachment.url
+                                    : ""
+                                }`
+                            }
+                        };
+                        interaction.channel.send({embeds: [exampleEmbed]})
+                    },1500)
+                })
             })
-        } else {
-            interaction.reply("This command is not availiable in this server")
-        }
 	},
 };
+
+async function getAllPinnedMessages(channels,array) {
+    for(let i = 0; i < channels.length; i++) {
+        channels[i].messages.fetchPinned()
+        .then((messages) => {
+            console.log("hello",channels[i]);
+            const pins = messages.map((el) => el)
+            pins.forEach((el) => array.push(el))
+        })
+    }
+}
+
+function validURL(str) {
+    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(str)
+}
