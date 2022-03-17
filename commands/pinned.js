@@ -1,14 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { Interaction } = require('discord.js');
-const config = require("./../config.json");
-const servers = config.PINNED_CHANNELS.split(" ");
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('pinned')
 		.setDescription('Grabs a random hilarious pinned message'),
 	async execute(interaction,client) {
-            interaction.reply("working on it...")
+            interaction.reply({embeds: [{
+                title: `grabbing random pinned message...`,
+                description: "please wait."
+            }]})
             await interaction.guild.channels.fetch().then((data) => {
                 let textChannels = data.filter((el) => el.type === "GUILD_TEXT")
                 let channels = textChannels.map((el) => el);
@@ -16,19 +16,28 @@ module.exports = {
                 getAllPinnedMessages(channels,pinnedMessagesArray)
                 .then(() => {
                     setTimeout(() => {
-                        let randomPin = pinnedMessagesArray[Math.floor(Math.random() * pinnedMessagesArray.length)]
-                        const exampleEmbed = {
-                            title: `${randomPin.content.substring(0,256)}`,
-                            description: `-*${randomPin.author.username}*`,
-                            image: {
-                                url: `${
-                                    (randomPin.attachments.size > 0)
-                                    ? getAttachment.url
-                                    : ""
-                                }`
-                            }
-                        };
-                        interaction.channel.send({embeds: [exampleEmbed]})
+                        try {
+                            let randomPin = pinnedMessagesArray[Math.floor(Math.random() * pinnedMessagesArray.length)]
+                            const exampleEmbed = {
+                                title: `${randomPin.content.substring(0,256)}`,
+                                description: `-*${randomPin.author.username}*`,
+                                image: {
+                                    url: `${
+                                        (randomPin.attachments.size > 0)
+                                        ? getAttachment.url
+                                        : ""
+                                    }`
+                                }
+                            };
+                            interaction.editReply({embeds: [exampleEmbed]})
+                          }
+                          catch(err) {
+                            console.log(err)
+                            interaction.editReply({embeds: [{
+                                title: `pinned message acquisition failed`,
+                                description: "very sad"
+                            }]})
+                          }
                     },1500)
                 })
             })
@@ -39,7 +48,6 @@ async function getAllPinnedMessages(channels,array) {
     for(let i = 0; i < channels.length; i++) {
         channels[i].messages.fetchPinned()
         .then((messages) => {
-            console.log("hello",channels[i]);
             const pins = messages.map((el) => el)
             pins.forEach((el) => array.push(el))
         })
