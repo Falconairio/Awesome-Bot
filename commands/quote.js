@@ -1,6 +1,6 @@
+/* This is the code for the quote command. It grabs a random quote from the quotes channel. */
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { default: axios } = require('axios');
-const config = require("./../config.json");
 
 module.exports = {
 	data: new SlashCommandBuilder()
