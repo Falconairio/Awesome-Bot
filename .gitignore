@@ -110,3 +110,5 @@ myjsonfile.json
 scraper.js
 register.js
 config.json
+preferences.json
+.DS_Store
